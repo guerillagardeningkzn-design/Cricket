@@ -1,4 +1,750 @@
-<!DOCTYPE html>
+<!DOC<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Casino Cricket</title>
+  <style>
+    :root {
+      --bg-dark: #0a2e1f;
+      --bg-gradient: linear-gradient(135deg, #0a2e1f 0%, #143d2e 100%);
+      --gold: #ffd700;
+      --gold-dark: #d4af37;
+      --card-bg: #ffffff;
+      --card-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      --text-light: #f0f0f0;
+      --text-gold: var(--gold);
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-light);
+      font-family: 'Georgia', 'Palatino Linotype', serif;
+      margin: 0;
+      padding: 16px 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      touch-action: manipulation;
+    }
+
+    h1 {
+      margin: 12px 0 16px;
+      font-size: clamp(2.1rem, 7vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-shadow: 0 4px 14px rgba(0,0,0,0.9), 0 0 20px rgba(255,215,0,0.4);
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px 36px;
+      margin-bottom: 16px;
+      font-size: clamp(1.1rem, 4.5vw, 1.25rem);
+      color: var(--text-light);
+      justify-content: center;
+      background: rgba(0,0,0,0.45);
+      padding: 16px 28px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,215,0,0.18);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    }
+
+    .high-score {
+      color: var(--gold);
+      font-weight: bold;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+    }
+
+    .rules-toggle {
+      margin: 12px 0 20px;
+      padding: 14px 32px;
+      font-size: 1.15rem;
+      background: linear-gradient(145deg, #2a4a3a, #3a5a4a);
+      color: white;
+      border: 2px solid rgba(255,215,0,0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      min-height: 56px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    .rules-toggle:hover, .rules-toggle:active {
+      background: linear-gradient(145deg, #3a5a4a, #4a6a5a);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255,215,0,0.25);
+    }
+
+    .help {
+      background: rgba(0,0,0,0.65);
+      padding: 24px 32px;
+      border-radius: 16px;
+      margin-bottom: 28px;
+      max-width: 820px;
+      width: 100%;
+      text-align: left;
+      font-size: clamp(1.05rem, 4vw, 1.15rem);
+      line-height: 1.65;
+      box-sizing: border-box;
+      display: none;
+      border: 2px solid rgba(255,215,0,0.35);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    }
+
+    .help.show {
+      display: block;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .controls {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      padding: 16px 36px;
+      font-size: clamp(1.05rem, 4.5vw, 1.2rem);
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-height: 60px;
+      touch-action: manipulation;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+      letter-spacing: 1px;
+    }
+
+    #resetBtn {
+      background: linear-gradient(145deg, #c62828, #b71c1c);
+      color: white;
+      text-transform: uppercase;
+    }
+
+    #resetBtn:hover, #resetBtn:active {
+      background: linear-gradient(145deg, #b71c1c, #9a0007);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(198,40,40,0.5);
+    }
+
+    #message {
+      margin-bottom: 24px;
+      font-size: clamp(1.3rem, 5.5vw, 1.5rem);
+      min-height: 2.4rem;
+      text-align: center;
+      padding: 16px 28px;
+      border-radius: 16px;
+      font-weight: bold;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(12px);
+      border: 2px solid transparent;
+      transition: all 0.4s ease;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, auto);
+      gap: clamp(16px, 4.5vw, 22px);
+      max-width: 820px;
+      width: 100%;
+      padding: 0 12px;
+      box-sizing: border-box;
+    }
+
+    .card-slot {
+      width: 100%;
+      height: 0;
+      padding-bottom: 140%;
+      background: rgba(30,50,40,0.6);
+      border: 3px dashed rgba(255,255,255,0.18);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+      box-shadow: inset 0 2px 12px rgba(0,0,0,0.6);
+    }
+
+    .card-slot:hover {
+      border-color: rgba(255,215,0,0.5);
+      box-shadow: 0 0 24px rgba(255,215,0,0.25), inset 0 2px 12px rgba(0,0,0,0.6);
+    }
+
+    .card-slot:active {
+      transform: scale(0.97);
+    }
+
+    .card-slot.selected {
+      border-color: var(--gold) !important;
+      box-shadow: 0 0 32px rgba(255,215,0,0.6), inset 0 2px 12px rgba(0,0,0,0.6) !important;
+      transform: scale(1.05);
+    }
+
+    .card {
+      position: absolute;
+      inset: 0;
+      background: var(--card-bg);
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      user-select: none;
+      transition: transform 0.2s ease;
+    }
+
+    .card-slot.selected .card {
+      transform: scale(1.03);
+    }
+
+    /* Only large center suit remains */
+    .center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(100px, 28vw, 180px);
+      line-height: 1;
+      opacity: 0.70;
+      text-shadow: 0 0 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.4);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .red   { color: #c00; }
+    .black { color: #000; }
+
+    #gameOverModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .modal-content {
+      background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+      color: #f0f0f0;
+      padding: clamp(28px, 8vw, 40px);
+      border-radius: 20px;
+      text-align: center;
+      max-width: 460px;
+      width: 92vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+      border: 3px solid rgba(255,215,0,0.4);
+    }
+
+    .modal-content h2 {
+      margin: 0 0 24px;
+      color: #ff4444;
+      font-size: clamp(1.8rem, 7vw, 2.4rem);
+      text-shadow: 0 2px 8px rgba(255,68,68,0.5);
+    }
+
+    .new-high-score {
+      color: #ffeb3b !important;
+      font-size: 1.8rem !important;
+      font-weight: 900 !important;
+      margin: 16px 0 !important;
+      padding: 12px 24px !important;
+      background: rgba(0,0,0,0.4) !important;
+      border-radius: 12px !important;
+      text-shadow: 0 0 12px rgba(0,0,0,0.9), 2px 2px 6px rgba(0,0,0,0.7) !important;
+      display: inline-block !important;
+      border: 2px solid rgba(255,235,59,0.5);
+    }
+
+    .modal-content button {
+      margin-top: 20px;
+      padding: 16px 40px;
+      font-size: 1.25rem;
+      min-height: 60px;
+      background: linear-gradient(145deg, #ffd700, #d4af37);
+      color: #111;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+      transition: all 0.3s ease;
+    }
+
+    .modal-content button:hover, .modal-content button:active {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(255,215,0,0.5);
+    }
+  </style>
+</head>
+<body>
+
+<h1>Casino Cricket</h1>
+
+<div class="stats">
+  <span>Hands played: <strong id="movesCount">0</strong></span>
+  <span>Chips: <strong id="score">0</strong></span>
+  <span>Best pot: <strong id="highScore">0</strong></span>
+  <span>Cards dealt: <strong id="cardsPlayed">0</strong></span>
+  <span>Possible plays: <strong id="movesLeft">?</strong></span>
+</div>
+
+<button class="rules-toggle" id="rulesToggle">Show House Rules</button>
+
+<div class="help" id="rulesPanel">
+  <strong>House Rules – Casino Cricket</strong><br><br>
+  Good evening, ladies and gentlemen.<br>
+  We’re playing Cricket tonight — clean, sharp, no funny business.<br><br>
+
+  • <strong>Pair</strong> — any two number cards that add up to eleven (Ace counts one).<br>
+  • <strong>Cricket</strong> — the face trio: Jack, Queen, King — any order, any suit, no duplicates.<br>
+  • Invalid call? Table resets the selection. Keep it tight.<br>
+  • Deck runs dry? We reshuffle a fresh 52 — game continues.<br>
+  • Board locks up with no legal plays? That’s the end of the hand.<br><br>
+
+  <strong>Payout schedule:</strong><br>
+  • Every card placed = +1 chip (starting nine included)<br>
+  • Cricket in a straight line (row, column or diagonal) = +50 chip bonus<br>
+  • All cards in the winning combination same suit = double the base payout for that play<br><br>
+
+  Eyes on the table. Good luck.
+</div>
+
+<div class="controls">
+  <button id="resetBtn">New Shoe (Full Reset)</button>
+</div>
+
+<div id="message"></div>
+
+<div class="grid" id="grid"></div>
+
+<div id="gameOverModal">
+  <div class="modal-content">
+    <h2>Hand Complete</h2>
+    <p>No more legal plays remain on the table.</p>
+    <p>Final pot: <strong id="finalScore">0</strong> chips</p>
+    <p id="highScoreMessage"></p>
+    <p>Would you like to start a fresh shoe?</p>
+    <button id="restartBtn">Deal New Hand</button>
+  </div>
+</div>
+
+<script>
+// ────────────────────────────────────────────────
+// Casino Cricket – complete reformed version
+// ────────────────────────────────────────────────
+
+const suits = [
+  { name: '♥', color: 'red' },
+  { name: '♦', color: 'red' },
+  { name: '♣', color: 'black' },
+  { name: '♠', color: 'black' }
+];
+
+const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+let deck = [];
+let slots = [];
+let selected = [];
+let mode = null;
+let movesCount = 0;
+let score = 0;
+let cardsPlayed = 0;
+let highScore = 0;
+
+// ─── High Score (localStorage) ───────────────────────────
+function loadHighScore() {
+  const saved = localStorage.getItem('casinoCricketHighScore');
+  if (saved !== null) {
+    highScore = parseInt(saved, 10) || 0;
+    document.getElementById('highScore').textContent = highScore;
+  }
+}
+
+function saveHighScore() {
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('casinoCricketHighScore', highScore);
+    document.getElementById('highScore').textContent = highScore;
+    return true;
+  }
+  return false;
+}
+
+function clearHighScore() {
+  localStorage.removeItem('casinoCricketHighScore');
+  highScore = 0;
+  document.getElementById('highScore').textContent = 0;
+}
+
+// ─── Helpers ───────────────────────────────────────────
+function hapticFeedback(type = 'light') {
+  if ('vibrate' in navigator) {
+    const patterns = {
+      light:   [10],
+      medium:  [30],
+      heavy:   [50, 30, 50],
+      double:  [20, 10, 20, 10, 50],
+      record:  [100, 50, 100, 50, 200]
+    };
+    navigator.vibrate(patterns[type] || patterns.light);
+  }
+}
+
+function updateStats(possible = '?') {
+  document.getElementById('movesCount').textContent = movesCount;
+  document.getElementById('score').textContent = score;
+  document.getElementById('highScore').textContent = highScore;
+  document.getElementById('cardsPlayed').textContent = cardsPlayed;
+  document.getElementById('movesLeft').textContent = possible;
+}
+
+function createDeck() {
+  deck = [];
+  for (let suit of suits) {
+    for (let rank of ranks) {
+      deck.push({ rank, suit: suit.name, color: suit.color });
+    }
+  }
+  shuffle(deck);
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function getValue(rank) {
+  if (rank === 'A') return 1;
+  if (rank === '10') return 10;
+  const num = parseInt(rank);
+  return isNaN(num) ? 0 : num;
+}
+
+function renderCard(card) {
+  const el = document.createElement('div');
+  el.className = 'card';
+
+  // Only large center suit — no corner pips
+  const center = document.createElement('div');
+  center.className = `center ${card.color}`;
+  center.textContent = card.suit;
+
+  el.appendChild(center);
+  return el;
+}
+
+function drawNextCard() {
+  if (deck.length === 0) {
+    createDeck();
+    showMessage("Shoe empty — fresh deck shuffled.", '#88ffaa');
+  }
+  cardsPlayed++;
+  score += 1;
+  updateStats();
+  return deck.shift();
+}
+
+function replaceCards(indices, newCards) {
+  indices.forEach((idx, i) => {
+    const slot = slots[idx];
+    slot.innerHTML = '';
+    slot.appendChild(renderCard(newCards[i]));
+    slot.dataset.rank  = newCards[i].rank;
+    slot.dataset.suit  = newCards[i].suit;
+    slot.dataset.color = newCards[i].color;
+  });
+  movesCount++;
+}
+
+function deselectAll() {
+  selected.forEach(i => slots[i].classList.remove('selected'));
+  selected = [];
+  mode = null;
+}
+
+function showMessage(text, color = '#ddd') {
+  const msg = document.getElementById('message');
+  msg.style.color = color;
+  msg.style.borderColor = color;
+  msg.textContent = text;
+  setTimeout(() => {
+    if (msg.textContent === text) {
+      msg.textContent = '';
+      msg.style.borderColor = 'transparent';
+    }
+  }, 5000);
+}
+
+function isTrioInLine(indices) {
+  const lines = [
+    [0,1,2], [3,4,5], [6,7,8],
+    [0,3,6], [1,4,7], [2,5,8],
+    [0,4,8], [2,4,6]
+  ];
+  const sorted = [...indices].sort((a,b)=>a-b);
+  return lines.some(line =>
+    line.length === sorted.length && line.every((v,i) => v === sorted[i])
+  );
+}
+
+function areAllSameSuit(indices) {
+  if (indices.length < 2) return false;
+  const suitSet = new Set(indices.map(i => slots[i].dataset.suit));
+  return suitSet.size === 1;
+}
+
+function performReplace(indices, isTrio = false) {
+  const needed = indices.length;
+  const newCards = [];
+  for (let i = 0; i < needed; i++) {
+    newCards.push(drawNextCard());
+  }
+
+  const baseMoveScore = needed;
+  const sameSuitBonus = areAllSameSuit(indices) ? baseMoveScore : 0;
+  score += sameSuitBonus;
+
+  replaceCards(indices, newCards);
+
+  let msg = isTrio ? "Cricket!" : "Pair pays!";
+
+  if (isTrio && isTrioInLine(indices)) {
+    score += 50;
+    msg += " Line bonus +50!";
+    hapticFeedback('heavy');
+  }
+
+  if (sameSuitBonus > 0) {
+    msg += ` Suited double (+${sameSuitBonus})!`;
+    hapticFeedback('double');
+  } else {
+    hapticFeedback('medium');
+  }
+
+  showMessage(msg, '#55ff88');
+  updateStats();
+  deselectAll();
+  checkGameOver();
+}
+
+function countPossibleMoves() {
+  const board = slots.map(s => s.dataset.rank || null);
+  let count = 0;
+
+  const freq = {};
+  for (let rank of board) {
+    const v = getValue(rank);
+    if (v >= 1 && v <= 10) freq[v] = (freq[v] || 0) + 1;
+  }
+
+  for (let a = 1; a <= 10; a++) {
+    const b = 11 - a;
+    if (b < a || b > 10) continue;
+    count += (freq[a] || 0) * (freq[b] || 0);
+  }
+
+  const j = board.filter(r => r === 'J').length;
+  const q = board.filter(r => r === 'Q').length;
+  const k = board.filter(r => r === 'K').length;
+  count += Math.min(j, q, k);
+
+  return count;
+}
+
+function checkGameOver() {
+  const possible = countPossibleMoves();
+  updateStats(possible);
+
+  if (possible === 0) {
+    const isNewRecord = saveHighScore();
+
+    document.getElementById('finalScore').textContent = score;
+
+    const msgEl = document.getElementById('highScoreMessage');
+    if (isNewRecord) {
+      msgEl.innerHTML = '<span class="new-high-score">BEST POT OF THE NIGHT!</span>';
+      hapticFeedback('record');
+      showMessage("New house record set! Well played.", '#ffeb3b');
+    } else {
+      msgEl.textContent = '';
+    }
+
+    document.getElementById('gameOverModal').style.display = 'flex';
+  }
+}
+
+function handleSlotInteraction(slot, idx) {
+  const rank = slot.dataset.rank;
+  if (!rank) return;
+
+  hapticFeedback('light');
+
+  if (selected.includes(idx)) {
+    selected = selected.filter(i => i !== idx);
+    slot.classList.remove('selected');
+    if (selected.length === 0) mode = null;
+    else {
+      const first = slots[selected[0]].dataset.rank;
+      mode = (getValue(first) >= 1 && getValue(first) <= 10) ? 'pair' : 'trio';
+    }
+    return;
+  }
+
+  if (selected.length === 0) {
+    const val = getValue(rank);
+    if (val >= 1 && val <= 10) {
+      mode = 'pair';
+    } else if (['J','Q','K'].includes(rank)) {
+      mode = 'trio';
+    } else {
+      showMessage("Start with a number or face card.", '#ffaa00');
+      return;
+    }
+  } else if (mode === 'pair') {
+    if (getValue(rank) < 1 || getValue(rank) > 10) {
+      showMessage("Numbers only for a pair.", '#ff5555');
+      return;
+    }
+  } else if (mode === 'trio') {
+    if (!['J','Q','K'].includes(rank)) {
+      showMessage("Only face cards for Cricket.", '#ff5555');
+      return;
+    }
+    if (selected.some(i => slots[i].dataset.rank === rank)) {
+      showMessage(`No duplicate faces allowed.`, '#ff5555');
+      return;
+    }
+  }
+
+  const max = mode === 'pair' ? 2 : 3;
+  if (selected.length >= max) return;
+
+  selected.push(idx);
+  slot.classList.add('selected');
+
+  if (selected.length === 2 && mode === 'pair') {
+    const v1 = getValue(slots[selected[0]].dataset.rank);
+    const v2 = getValue(slots[selected[1]].dataset.rank);
+    if (v1 + v2 === 11) {
+      performReplace([...selected], false);
+    }
+  } else if (selected.length === 3 && mode === 'trio') {
+    const ranksSet = new Set(selected.map(i => slots[i].dataset.rank));
+    if (ranksSet.size === 3 && ranksSet.has('J') && ranksSet.has('Q') && ranksSet.has('K')) {
+      performReplace([...selected], true);
+    }
+  }
+}
+
+function initGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  slots = [];
+  selected = [];
+  mode = null;
+
+  cardsPlayed = 9;
+  score = 9;
+
+  for (let i = 0; i < 9; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'card-slot';
+    slot.dataset.index = i;
+
+    const card = deck[i];
+    if (card) {
+      slot.appendChild(renderCard(card));
+      slot.dataset.rank  = card.rank;
+      slot.dataset.suit  = card.suit;
+      slot.dataset.color = card.color;
+    }
+
+    ['click', 'touchend'].forEach(event => {
+      slot.addEventListener(event, (e) => {
+        e.preventDefault();
+        handleSlotInteraction(slot, i);
+      }, { passive: false });
+    });
+
+    grid.appendChild(slot);
+    slots.push(slot);
+  }
+
+  deck.splice(0, 9);
+  updateStats();
+  checkGameOver();
+}
+
+function resetEverything(fullReset = true) {
+  createDeck();
+  document.getElementById('gameOverModal').style.display = 'none';
+  document.getElementById('message').textContent = '';
+  movesCount = 0;
+  score = 0;
+  cardsPlayed = 0;
+  deselectAll();
+
+  if (fullReset) {
+    // clearHighScore();   // uncomment if you want full reset to wipe record
+  }
+
+  initGrid();
+}
+
+// ─── Event Listeners ───────────────────────────────────
+const rulesToggle = document.getElementById('rulesToggle');
+const rulesPanel = document.getElementById('rulesPanel');
+
+rulesToggle.addEventListener('click', () => {
+  rulesPanel.classList.toggle('show');
+  rulesToggle.textContent = rulesPanel.classList.contains('show') ? 'Hide House Rules' : 'Show House Rules';
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => resetEverything(true));
+document.getElementById('restartBtn').addEventListener('click', () => {
+  document.getElementById('gameOverModal').style.display = 'none';
+  resetEverything(false);
+});
+
+// ─── Start ─────────────────────────────────────────────
+loadHighScore();
+resetEverything(true);
+
+// Mobile zoom prevention
+document.addEventListener('touchstart', e => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, false);
+</script>
+</body>
+</html>TYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
