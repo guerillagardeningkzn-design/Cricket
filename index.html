@@ -238,7 +238,7 @@
     .red   .number { color: #c00; }
     .black .number { color: #000; }
 
-    /* Large center suit – scaled down on mobile */
+    /* Large center suit */
     .center {
       position: absolute;
       inset: 0;
@@ -251,20 +251,27 @@
       text-shadow: 0 0 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.4);
       pointer-events: none;
       user-select: none;
-      transition: font-size 0.3s ease;
+      transition: all 0.3s ease;
     }
 
     .red   { color: #c00; }
     .black { color: #000; }
 
-    /* Mobile: make center suit smaller & fainter so corners are clearly visible */
+    /* Mobile adjustments: smaller & closer corner ranks + smaller/fainter center suit */
     @media (max-width: 768px) {
-      .center {
-        font-size: clamp(70px, 22vw, 120px);
-        opacity: 0.45;
-      }
       .corner {
-        font-size: clamp(42px, 12vw, 60px);
+        font-size: clamp(28px, 8vw, 40px);      /* smaller rank text */
+        width: 50px;
+      }
+      .top-left  { top: 2%; left: 4px; }        /* closer to top-left corner */
+      .bottom-right {
+        bottom: 2%;
+        right: 4px;
+      }
+
+      .center {
+        font-size: clamp(70px, 22vw, 120px);    /* smaller center suit */
+        opacity: 0.45;                          /* even fainter */
       }
     }
 
@@ -386,7 +393,7 @@
 
 <script>
 // ────────────────────────────────────────────────
-// Casino Cricket – corners show rank only, center suit scaled down on mobile
+// Casino Cricket – mobile corner ranks smaller & closer to edge
 // ────────────────────────────────────────────────
 
 const suits = [
@@ -482,7 +489,7 @@ function renderCard(card) {
   const el = document.createElement('div');
   el.className = 'card';
 
-  // Corner rank only – no suit icon
+  // Corner rank only – no suit symbol
   const tl = document.createElement('div');
   tl.className = `corner top-left ${card.color}`;
   tl.innerHTML = `<div class="number">${card.rank}</div>`;
