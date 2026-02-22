@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>9-Card Game – Endless Mode</title>
+  <style>
+    body {
+      background: #0a3d2e;
+      color: #eee;
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      touch-action: manipulation;
+    }
+
+    h1 {
+      margin: 10px 0 8px;
+      font-size: clamp(1.8rem, 5vw, 2.1rem);
+      text-shadow: 0 2px 6px #0008;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px 30px;
+      margin-bottom: 8px;
+      font-size: clamp(1rem, 4vw, 1.1rem);
+      color: #ddd;
+      justify-content: center;
+    }
+
+    .high-score {
+      color: #ffd700;
+      font-weight: bold;
+    }
+
+    .rules-toggle {
+      margin: 8px 0 16px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      min-height: 44px;
+      touch-action: manipulation;
+    }
+
+    .rules-toggle:hover {
+      background: #666;
+    }
+
+    .help {
+      background: rgba(0,0,0,0.4);
+      padding: 16px 24px;
+      border-radius: 10px;
+      margin-bottom: 24px;
+      max-width: 780px;
+      width: 100%;
+      text-align: left;
+      font-size: clamp(0.85rem, 3.5vw, 0.95rem);
+      line-height: 1.5;
+      box-sizing: border-box;
+      display: none;
+    }
+
+    .help.show {
+      display: block;
+    }
+
+    .controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      padding: 12px 28px;
+      font-size: clamp(0.95rem, 4vw, 1rem);
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.18s;
+      min-height: 48px;
+      touch-action: manipulation;
+    }
+
+    #resetBtn {
+      background: #e63946;
+      color: white;
+      box-shadow: 0 4px 10px #0006;
+    }
+
+    #resetBtn:hover, #resetBtn:active {
+      background: #d00000;
+      transform: translateY(-2px);
+    }
+
+    #message {
+      margin-bottom: 16px;
+      font-size: clamp(1.1rem, 4.5vw, 1.2rem);
+      min-height: 1.6rem;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, auto);
+      gap: clamp(10px, 3vw, 14px);
+      max-width: 780px;
+      width: 100%;
+      padding: 0 10px;
+      box-sizing: border-box;
+    }
+
+    .card-slot {
+      width: 100%;
+      height: 0;
+      padding-bottom: 140%;
+      background: #222;
+      border: 2px dashed #555;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .card-slot:hover {
+      border-color: #aaa;
+      box-shadow: 0 0 12px rgba(255,255,255,0.15);
+    }
+
+    .card-slot:active {
+      transform: scale(0.98);
+    }
+
+    .card-slot.selected {
+      border-color: #ffd700 !important;
+      box-shadow: 0 0 18px rgba(255,215,0,0.7) !important;
+      transform: scale(1.04);
+    }
+
+    .card {
+      position: absolute;
+      inset: 0;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.45);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .corner {
+      position: absolute;
+      width: 48px;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .top-left  { top: 4%; left: 5px; }
+    .bottom-right {
+      bottom: 4%;
+      right: 5px;
+      transform: rotate(180deg);
+    }
+
+    .number {
+      font-size: clamp(28px, 8vw, 38px);
+      font-weight: 900;
+      line-height: 0.8;
+      margin: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .suit {
+      font-size: clamp(24px, 7vw, 34px);
+      line-height: 0.9;
+      margin: 2px 0 0 0;
+    }
+
+    .red  { color: #c00; }
+    .black { color: #000; }
+
+    .center {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(90px, 25vw, 140px);
+      line-height: 1;
+      opacity: 0.55;
+      text-shadow: 0 0 12px rgba(0,0,0,0.4), 0 0 24px rgba(0,0,0,0.25);
+      pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .stats { gap: 15px 20px; }
+      .grid { gap: 12px; padding: 0 5px; }
+      button { padding: 14px 20px; min-height: 52px; }
+    }
+
+    #gameOverModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .modal-content {
+      background: #fff;
+      color: #333;
+      padding: clamp(24px, 8vw, 32px);
+      border-radius: 12px;
+      text-align: center;
+      max-width: 420px;
+      width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .modal-content h2 {
+      margin: 0 0 20px;
+      color: #c00;
+      font-size: clamp(1.5rem, 6vw, 1.8rem);
+    }
+
+    .new-high-score {
+      color: #ffeb3b !important;
+      font-size: 1.5rem !important;
+      font-weight: bold !important;
+      margin: 12px 0 !important;
+      padding: 8px 16px !important;
+      background: rgba(0,0,0,0.15) !important;
+      border-radius: 8px !important;
+      text-shadow: 
+        0 0 8px rgba(0,0,0,0.8),
+        2px 2px 4px rgba(0,0,0,0.6),
+        -2px -2px 4px rgba(0,0,0,0.6) !important;
+      display: inline-block !important;
+    }
+
+    .modal-content button {
+      margin-top: 16px;
+      padding: 14px 32px;
+      font-size: 1.1rem;
+      min-height: 52px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>9-Card Endless Matching Game</h1>
+
+<div class="stats">
+  <span>Moves made: <strong id="movesCount">0</strong></span>
+  <span>Score: <strong id="score">0</strong></span>
+  <span>High Score: <strong id="highScore">0</strong></span>
+  <span>Cards played: <strong id="cardsPlayed">0</strong></span>
+  <span>Moves possible: <strong id="movesLeft">?</strong></span>
+</div>
+
+<button class="rules-toggle" id="rulesToggle">Show Rules</button>
+
+<div class="help" id="rulesPanel">
+  <strong>Rules:</strong><br>
+  • <strong>Pair</strong>: two number cards (A=1 to 10) summing to 11 → auto-replaced.<br>
+  • <strong>Trio</strong>: select any order of J, Q, K (unique ranks, any suits).<br>
+  • Invalid selections reset automatically.<br>
+  • When deck runs out → reshuffle full 52-card deck and continue.<br>
+  • When no valid moves left on board → game over.<br><br>
+  <strong>Scoring:</strong><br>
+  • +1 point per card placed (initial 9 + every replacement)<br>
+  • +50 bonus if replaced J-Q-K trio forms a straight line<br>
+  • <strong>DOUBLE move score if all cards in the move are the same suit!</strong>
+</div>
+
+<div class="controls">
+  <button id="resetBtn">New Game (Full Reset)</button>
+</div>
+
+<div id="message"></div>
+
+<div class="grid" id="grid"></div>
+
+<div id="gameOverModal">
+  <div class="modal-content">
+    <h2>GAME OVER</h2>
+    <p>No more valid moves are possible on the board.</p>
+    <p>Final score: <strong id="finalScore">0</strong></p>
+    <p id="highScoreMessage"></p>
+    <p>Would you like to start a new game?</p>
+    <button id="restartBtn">Start New Game</button>
+  </div>
+</div>
+
+<script>
+// ────────────────────────────────────────────────
+// High score now stored in Cache API instead of localStorage
+// ────────────────────────────────────────────────
+
+const CACHE_NAME = '9card-game-cache-v1';
+const HIGH_SCORE_KEY = 'highScore';
+
+const suits = [
+  { name: '♥', color: 'red' },
+  { name: '♦', color: 'red' },
+  { name: '♣', color: 'black' },
+  { name: '♠', color: 'black' }
+];
+
+const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+let deck = [];
+let slots = [];
+let selected = [];
+let mode = null;
+let movesCount = 0;
+let score = 0;
+let cardsPlayed = 0;
+let highScore = 0;
+
+// ─── Cache-based High Score ───────────────────────────────
+async function loadHighScore() {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const response = await cache.match(new Request(HIGH_SCORE_KEY));
+    if (response) {
+      const text = await response.text();
+      highScore = parseInt(text, 10) || 0;
+      document.getElementById('highScore').textContent = highScore;
+    }
+  } catch (err) {
+    console.warn('Cache read failed:', err);
+  }
+}
+
+async function saveHighScore() {
+  if (score <= highScore) return false;
+
+  highScore = score;
+  document.getElementById('highScore').textContent = highScore;
+
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(
+      new Request(HIGH_SCORE_KEY),
+      new Response(highScore.toString(), {
+        headers: { 'Content-Type': 'text/plain' }
+      })
+    );
+    return true;
+  } catch (err) {
+    console.warn('Cache write failed:', err);
+    return false;
+  }
+}
+
+async function clearHighScore() {
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.delete(new Request(HIGH_SCORE_KEY));
+    highScore = 0;
+    document.getElementById('highScore').textContent = 0;
+  } catch (err) {
+    console.warn('Cache delete failed:', err);
+  }
+}
+
+// ─── Rest of the game logic remains unchanged ─────────────
+
+function hapticFeedback(type = 'light') {
+  if ('vibrate' in navigator) {
+    const patterns = {
+      light:   [10],
+      medium:  [30],
+      heavy:   [50, 30, 50],
+      double:  [20, 10, 20, 10, 50],
+      record:  [100, 50, 100, 50, 200]
+    };
+    navigator.vibrate(patterns[type] || patterns.light);
+  }
+}
+
+function updateStats(possible = '?') {
+  document.getElementById('movesCount').textContent = movesCount;
+  document.getElementById('score').textContent = score;
+  document.getElementById('highScore').textContent = highScore;
+  document.getElementById('cardsPlayed').textContent = cardsPlayed;
+  document.getElementById('movesLeft').textContent = possible;
+}
+
+function createDeck() {
+  deck = [];
+  for (let suit of suits) {
+    for (let rank of ranks) {
+      deck.push({ rank, suit: suit.name, color: suit.color });
+    }
+  }
+  shuffle(deck);
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function getValue(rank) {
+  if (rank === 'A') return 1;
+  if (rank === '10') return 10;
+  const num = parseInt(rank);
+  return isNaN(num) ? 0 : num;
+}
+
+function renderCard(card) {
+  const el = document.createElement('div');
+  el.className = 'card';
+
+  const tl = document.createElement('div');
+  tl.className = 'corner top-left';
+  tl.innerHTML = `<div class="number ${card.color}">${card.rank}</div>
+                  <div class="suit ${card.color}">${card.suit}</div>`;
+
+  const br = document.createElement('div');
+  br.className = 'corner bottom-right';
+  br.innerHTML = `<div class="number ${card.color}">${card.rank}</div>
+                  <div class="suit ${card.color}">${card.suit}</div>`;
+
+  const center = document.createElement('div');
+  center.className = `center ${card.color}`;
+  center.textContent = card.suit;
+
+  el.append(tl, br, center);
+  return el;
+}
+
+function drawNextCard() {
+  if (deck.length === 0) {
+    createDeck();
+    showMessage("Deck empty → reshuffled!", '#88ffaa');
+  }
+  cardsPlayed++;
+  score += 1;
+  updateStats();
+  return deck.shift();
+}
+
+function replaceCards(indices, newCards) {
+  indices.forEach((idx, i) => {
+    const slot = slots[idx];
+    slot.innerHTML = '';
+    slot.appendChild(renderCard(newCards[i]));
+    slot.dataset.rank  = newCards[i].rank;
+    slot.dataset.suit  = newCards[i].suit;
+    slot.dataset.color = newCards[i].color;
+  });
+  movesCount++;
+}
+
+function deselectAll() {
+  selected.forEach(i => slots[i].classList.remove('selected'));
+  selected = [];
+  mode = null;
+}
+
+function showMessage(text, color = '#ddd') {
+  const msg = document.getElementById('message');
+  msg.style.color = color;
+  msg.textContent = text;
+  setTimeout(() => {
+    if (msg.textContent === text) msg.textContent = '';
+  }, 4000);
+}
+
+function isTrioInLine(indices) {
+  const lines = [
+    [0,1,2], [3,4,5], [6,7,8],
+    [0,3,6], [1,4,7], [2,5,8],
+    [0,4,8], [2,4,6]
+  ];
+  const sorted = [...indices].sort((a,b)=>a-b);
+  return lines.some(line =>
+    line.length === sorted.length && line.every((v,i) => v === sorted[i])
+  );
+}
+
+function areAllSameSuit(indices) {
+  if (indices.length < 2) return false;
+  const suitSet = new Set(indices.map(i => slots[i].dataset.suit));
+  return suitSet.size === 1;
+}
+
+function performReplace(indices, isTrio = false) {
+  const needed = indices.length;
+  const newCards = [];
+  for (let i = 0; i < needed; i++) {
+    newCards.push(drawNextCard());
+  }
+
+  const baseMoveScore = needed;
+  const sameSuitBonus = areAllSameSuit(indices) ? baseMoveScore : 0;
+  score += sameSuitBonus;
+
+  replaceCards(indices, newCards);
+
+  let msg = isTrio ? "Trio!" : "Pair!";
+
+  if (isTrio && isTrioInLine(indices)) {
+    score += 50;
+    msg += " LINE +50!";
+    hapticFeedback('heavy');
+  }
+
+  if (sameSuitBonus > 0) {
+    msg += ` SAME SUIT ×2 (+${sameSuitBonus})!`;
+    hapticFeedback('double');
+  } else {
+    hapticFeedback('medium');
+  }
+
+  showMessage(msg, '#55ff88');
+  updateStats();
+  deselectAll();
+  checkGameOver();
+}
+
+function countPossibleMoves() {
+  const board = slots.map(s => s.dataset.rank || null);
+  let count = 0;
+
+  const freq = {};
+  for (let rank of board) {
+    const v = getValue(rank);
+    if (v >= 1 && v <= 10) freq[v] = (freq[v] || 0) + 1;
+  }
+
+  for (let a = 1; a <= 10; a++) {
+    const b = 11 - a;
+    if (b < a || b > 10) continue;
+    count += (freq[a] || 0) * (freq[b] || 0);
+  }
+
+  const j = board.filter(r => r === 'J').length;
+  const q = board.filter(r => r === 'Q').length;
+  const k = board.filter(r => r === 'K').length;
+  count += Math.min(j, q, k);
+
+  return count;
+}
+
+function checkGameOver() {
+  const possible = countPossibleMoves();
+  updateStats(possible);
+
+  if (possible === 0) {
+    saveHighScore().then(isNewRecord => {
+      document.getElementById('finalScore').textContent = score;
+
+      const msgEl = document.getElementById('highScoreMessage');
+      if (isNewRecord) {
+        msgEl.innerHTML = '<span class="new-high-score">NEW HIGH SCORE!</span>';
+        hapticFeedback('record');
+        showMessage("NEW HIGH SCORE ACHIEVED! 🎉", '#ffeb3b');
+      } else {
+        msgEl.textContent = '';
+      }
+
+      document.getElementById('gameOverModal').style.display = 'flex';
+    });
+  }
+}
+
+function handleSlotInteraction(slot, idx) {
+  const rank = slot.dataset.rank;
+  if (!rank) return;
+
+  hapticFeedback('light');
+
+  if (selected.includes(idx)) {
+    selected = selected.filter(i => i !== idx);
+    slot.classList.remove('selected');
+    if (selected.length === 0) mode = null;
+    else {
+      const first = slots[selected[0]].dataset.rank;
+      mode = (getValue(first) >= 1 && getValue(first) <= 10) ? 'pair' : 'trio';
+    }
+    return;
+  }
+
+  if (selected.length === 0) {
+    const val = getValue(rank);
+    if (val >= 1 && val <= 10) {
+      mode = 'pair';
+    } else if (['J','Q','K'].includes(rank)) {
+      mode = 'trio';
+    } else {
+      showMessage("Start with 1–10 or J/Q/K", '#ffaa00');
+      return;
+    }
+  } else if (mode === 'pair') {
+    if (getValue(rank) < 1 || getValue(rank) > 10) {
+      showMessage("Only numbers 1–10", '#ff5555');
+      return;
+    }
+  } else if (mode === 'trio') {
+    if (!['J','Q','K'].includes(rank)) {
+      showMessage("Only J/Q/K", '#ff5555');
+      return;
+    }
+    if (selected.some(i => slots[i].dataset.rank === rank)) {
+      showMessage(`Invalid: duplicate ${rank}`, '#ff5555');
+      return;
+    }
+  }
+
+  const max = mode === 'pair' ? 2 : 3;
+  if (selected.length >= max) return;
+
+  selected.push(idx);
+  slot.classList.add('selected');
+
+  if (selected.length === 2 && mode === 'pair') {
+    const v1 = getValue(slots[selected[0]].dataset.rank);
+    const v2 = getValue(slots[selected[1]].dataset.rank);
+    if (v1 + v2 === 11) {
+      performReplace([...selected], false);
+    }
+  } else if (selected.length === 3 && mode === 'trio') {
+    const ranksSet = new Set(selected.map(i => slots[i].dataset.rank));
+    if (ranksSet.size === 3 && ranksSet.has('J') && ranksSet.has('Q') && ranksSet.has('K')) {
+      performReplace([...selected], true);
+    }
+  }
+}
+
+function initGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  slots = [];
+  selected = [];
+  mode = null;
+
+  cardsPlayed = 9;
+  score = 9;
+
+  for (let i = 0; i < 9; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'card-slot';
+    slot.dataset.index = i;
+
+    const card = deck[i];
+    if (card) {
+      slot.appendChild(renderCard(card));
+      slot.dataset.rank  = card.rank;
+      slot.dataset.suit  = card.suit;
+      slot.dataset.color = card.color;
+    }
+
+    ['click', 'touchend'].forEach(event => {
+      slot.addEventListener(event, (e) => {
+        e.preventDefault();
+        handleSlotInteraction(slot, i);
+      }, { passive: false });
+    });
+
+    grid.appendChild(slot);
+    slots.push(slot);
+  }
+
+  deck.splice(0, 9);
+  updateStats();
+  checkGameOver();
+}
+
+function resetEverything(fullReset = true) {
+  createDeck();
+  document.getElementById('gameOverModal').style.display = 'none';
+  document.getElementById('message').textContent = '';
+  movesCount = 0;
+  score = 0;
+  cardsPlayed = 0;
+  deselectAll();
+
+  if (fullReset) {
+    clearHighScore(); // comment out if you want to keep high score forever
+  }
+
+  initGrid();
+}
+
+// ─── Event Listeners ───────────────────────────────────
+const rulesToggle = document.getElementById('rulesToggle');
+const rulesPanel = document.getElementById('rulesPanel');
+
+rulesToggle.addEventListener('click', () => {
+  rulesPanel.classList.toggle('show');
+  rulesToggle.textContent = rulesPanel.classList.contains('show') ? 'Hide Rules' : 'Show Rules';
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => resetEverything(true));
+document.getElementById('restartBtn').addEventListener('click', () => {
+  document.getElementById('gameOverModal').style.display = 'none';
+  resetEverything(false);
+});
+
+// ─── Start ─────────────────────────────────────────────
+loadHighScore().then(() => {
+  resetEverything(true);
+});
+
+// Prevent double-tap zoom on mobile
+document.addEventListener('touchstart', e => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, false);
+</script>
+</body>
+</html>
