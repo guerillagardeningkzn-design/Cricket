@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>9-Card Game – Endless Mode </title>
+  <title>9-Card Game – Endless Mode</title>
   <style>
     body {
       background: #0a3d2e;
@@ -317,11 +317,8 @@
 
 <script>
 // ────────────────────────────────────────────────
-// High score now stored in Cache API instead of localStorage
+// High score stored reliably with localStorage
 // ────────────────────────────────────────────────
-
-const CACHE_NAME = '9card-game-cache-v1';
-const HIGH_SCORE_KEY = 'highScore';
 
 const suits = [
   { name: '♥', color: 'red' },
@@ -341,54 +338,32 @@ let score = 0;
 let cardsPlayed = 0;
 let highScore = 0;
 
-// ─── Cache-based High Score ───────────────────────────────
-async function loadHighScore() {
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    const response = await cache.match(new Request(HIGH_SCORE_KEY));
-    if (response) {
-      const text = await response.text();
-      highScore = parseInt(text, 10) || 0;
-      document.getElementById('highScore').textContent = highScore;
-    }
-  } catch (err) {
-    console.warn('Cache read failed:', err);
+// ─── High Score (localStorage) ───────────────────────────
+function loadHighScore() {
+  const saved = localStorage.getItem('nineCardHighScore');
+  if (saved !== null) {
+    highScore = parseInt(saved, 10) || 0;
+    document.getElementById('highScore').textContent = highScore;
   }
 }
 
-async function saveHighScore() {
-  if (score <= highScore) return false;
-
-  highScore = score;
-  document.getElementById('highScore').textContent = highScore;
-
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    await cache.put(
-      new Request(HIGH_SCORE_KEY),
-      new Response(highScore.toString(), {
-        headers: { 'Content-Type': 'text/plain' }
-      })
-    );
+function saveHighScore() {
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('nineCardHighScore', highScore);
+    document.getElementById('highScore').textContent = highScore;
     return true;
-  } catch (err) {
-    console.warn('Cache write failed:', err);
-    return false;
   }
+  return false;
 }
 
-async function clearHighScore() {
-  try {
-    const cache = await caches.open(CACHE_NAME);
-    await cache.delete(new Request(HIGH_SCORE_KEY));
-    highScore = 0;
-    document.getElementById('highScore').textContent = 0;
-  } catch (err) {
-    console.warn('Cache delete failed:', err);
-  }
+function clearHighScore() {
+  localStorage.removeItem('nineCardHighScore');
+  highScore = 0;
+  document.getElementById('highScore').textContent = 0;
 }
 
-// ─── Rest of the game logic remains unchanged ─────────────
+// ─── Rest of game logic ──────────────────────────────────
 
 function hapticFeedback(type = 'light') {
   if ('vibrate' in navigator) {
@@ -576,20 +551,20 @@ function checkGameOver() {
   updateStats(possible);
 
   if (possible === 0) {
-    saveHighScore().then(isNewRecord => {
-      document.getElementById('finalScore').textContent = score;
+    const isNewRecord = saveHighScore();
 
-      const msgEl = document.getElementById('highScoreMessage');
-      if (isNewRecord) {
-        msgEl.innerHTML = '<span class="new-high-score">NEW HIGH SCORE!</span>';
-        hapticFeedback('record');
-        showMessage("NEW HIGH SCORE ACHIEVED! 🎉", '#ffeb3b');
-      } else {
-        msgEl.textContent = '';
-      }
+    document.getElementById('finalScore').textContent = score;
 
-      document.getElementById('gameOverModal').style.display = 'flex';
-    });
+    const msgEl = document.getElementById('highScoreMessage');
+    if (isNewRecord) {
+      msgEl.innerHTML = '<span class="new-high-score">NEW HIGH SCORE!</span>';
+      hapticFeedback('record');
+      showMessage("NEW HIGH SCORE ACHIEVED! 🎉", '#ffeb3b');
+    } else {
+      msgEl.textContent = '';
+    }
+
+    document.getElementById('gameOverModal').style.display = 'flex';
   }
 }
 
@@ -705,7 +680,7 @@ function resetEverything(fullReset = true) {
   deselectAll();
 
   if (fullReset) {
-    clearHighScore(); // comment out if you want to keep high score forever
+    // clearHighScore();   // ← comment in if you want full reset to also reset high score
   }
 
   initGrid();
@@ -727,9 +702,8 @@ document.getElementById('restartBtn').addEventListener('click', () => {
 });
 
 // ─── Start ─────────────────────────────────────────────
-loadHighScore().then(() => {
-  resetEverything(true);
-});
+loadHighScore();
+resetEverything(true);
 
 // Prevent double-tap zoom on mobile
 document.addEventListener('touchstart', e => {
