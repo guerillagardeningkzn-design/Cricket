@@ -460,7 +460,7 @@
 
 <script>
 // ────────────────────────────────────────────────
-// Casino Cricket – sounds hosted from your repo
+// Casino Cricket – complete script with sounds from your repo
 // ────────────────────────────────────────────────
 
 const suits = [
@@ -482,42 +482,82 @@ let cardsPlayed = 0;
 let highScore = 0;
 let soundEnabled = true;
 
-// Audio references
+// Audio from your GitHub Pages repo (using .wav)
 const selectSound   = document.getElementById('selectSound');
 const pairSound     = document.getElementById('pairSound');
 const cricketSound  = document.getElementById('cricketSound');
 const recordSound   = document.getElementById('recordSound');
 
-// Sound toggle in stats
+// ─── Core UI Helpers ───────────────────────────────────
+function showMessage(text, color = '#ddd') {
+  const msg = document.getElementById('message');
+  if (!msg) return;
+
+  msg.style.color = color;
+  msg.style.borderColor = color;
+  msg.textContent = text;
+
+  setTimeout(() => {
+    if (msg.textContent === text) {
+      msg.textContent = '';
+      msg.style.borderColor = 'transparent';
+    }
+  }, 5000);
+}
+
+function hapticFeedback(type = 'light') {
+  if ('vibrate' in navigator) {
+    const patterns = {
+      light:   [10],
+      medium:  [30],
+      heavy:   [50, 30, 50],
+      double:  [20, 10, 20, 10, 50],
+      record:  [100, 50, 100, 50, 200]
+    };
+    navigator.vibrate(patterns[type] || patterns.light);
+  }
+}
+
+function updateStats(possible = '?') {
+  document.getElementById('movesCount').textContent = movesCount;
+  document.getElementById('score').textContent = score;
+  document.getElementById('highScore').textContent = highScore;
+  document.getElementById('cardsPlayed').textContent = cardsPlayed;
+  document.getElementById('movesLeft').textContent = possible;
+}
+
+// ─── Sound Control ─────────────────────────────────────
+function playSound(audioEl) {
+  if (soundEnabled && audioEl) {
+    audioEl.currentTime = 0;
+    audioEl.play().catch(err => {
+      console.log("Audio play failed:", err.message);
+    });
+  }
+}
+
+// Toggle sound (in stats bar)
 document.getElementById('soundToggle').addEventListener('click', () => {
   soundEnabled = !soundEnabled;
   document.getElementById('soundToggle').textContent = soundEnabled ? 'ON' : 'OFF';
   showMessage(soundEnabled ? "Sound enabled" : "Sound muted", soundEnabled ? '#88ff88' : '#ff8888');
 });
 
-// Unlock audio context on first real user gesture
+// Unlock audio context on first real tap
 document.getElementById('unlockSoundBtn').addEventListener('click', () => {
-  // Very quiet unlock sound to satisfy browser policy
-  selectSound.volume = 0.05;
-  selectSound.currentTime = 0;
-  selectSound.play().catch(() => {});
-  selectSound.pause();
+  // Tiny silent unlock attempt
+  if (selectSound) {
+    selectSound.volume = 0.01;
+    selectSound.currentTime = 0;
+    selectSound.play().catch(() => {});
+    selectSound.pause();
+  }
 
   document.getElementById('soundUnlock').classList.add('hidden');
   showMessage("Sounds unlocked ✓ Tap cards to play!", '#88ff88');
 });
 
-// Safe play function
-function playSound(audioEl) {
-  if (soundEnabled && audioEl) {
-    audioEl.currentTime = 0;
-    audioEl.play().catch(() => {
-      // Silent fail – common on first few plays or strict policies
-    });
-  }
-}
-
-// ─── High Score ────────────────────────────────────────
+// ─── High Score (localStorage) ─────────────────────────
 function loadHighScore() {
   const saved = localStorage.getItem('casinoCricketHighScore');
   if (saved !== null) {
@@ -542,10 +582,110 @@ function clearHighScore() {
   document.getElementById('highScore').textContent = 0;
 }
 
-// ─── Game logic continues (only showing changed parts) ──
+// ─── Game Logic ────────────────────────────────────────
+function createDeck() {
+  deck = [];
+  for (let suit of suits) {
+    for (let rank of ranks) {
+      deck.push({ rank, suit: suit.name, color: suit.color });
+    }
+  }
+  shuffle(deck);
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function getValue(rank) {
+  if (rank === 'A') return 1;
+  if (rank === '10') return 10;
+  const num = parseInt(rank);
+  return isNaN(num) ? 0 : num;
+}
+
+function renderCard(card) {
+  const el = document.createElement('div');
+  el.className = 'card';
+
+  const tl = document.createElement('div');
+  tl.className = `corner top-left ${card.color}`;
+  tl.innerHTML = `<div class="number">${card.rank}</div>`;
+
+  const br = document.createElement('div');
+  br.className = `corner bottom-right ${card.color}`;
+  br.innerHTML = `<div class="number">${card.rank}</div>`;
+
+  const center = document.createElement('div');
+  center.className = `center ${card.color}`;
+  center.textContent = card.suit;
+
+  el.append(tl, br, center);
+  return el;
+}
+
+function drawNextCard() {
+  if (deck.length === 0) {
+    createDeck();
+    showMessage("Shoe empty — fresh deck shuffled.", '#88ffaa');
+  }
+  cardsPlayed++;
+  score += 1;
+  updateStats();
+  return deck.shift();
+}
+
+function replaceCards(indices, newCards) {
+  indices.forEach((idx, i) => {
+    const slot = slots[idx];
+    slot.innerHTML = '';
+    slot.appendChild(renderCard(newCards[i]));
+    slot.dataset.rank  = newCards[i].rank;
+    slot.dataset.suit  = newCards[i].suit;
+    slot.dataset.color = newCards[i].color;
+  });
+  movesCount++;
+}
+
+function deselectAll() {
+  selected.forEach(i => slots[i].classList.remove('selected'));
+  selected = [];
+  mode = null;
+}
+
+function isTrioInLine(indices) {
+  const lines = [
+    [0,1,2], [3,4,5], [6,7,8],
+    [0,3,6], [1,4,7], [2,5,8],
+    [0,4,8], [2,4,6]
+  ];
+  const sorted = [...indices].sort((a,b)=>a-b);
+  return lines.some(line =>
+    line.length === sorted.length && line.every((v,i) => v === sorted[i])
+  );
+}
+
+function areAllSameSuit(indices) {
+  if (indices.length < 2) return false;
+  const suitSet = new Set(indices.map(i => slots[i].dataset.suit));
+  return suitSet.size === 1;
+}
 
 function performReplace(indices, isTrio = false) {
-  // ... (your existing logic up to score calculation)
+  const needed = indices.length;
+  const newCards = [];
+  for (let i = 0; i < needed; i++) {
+    newCards.push(drawNextCard());
+  }
+
+  const baseMoveScore = needed;
+  const sameSuitBonus = areAllSameSuit(indices) ? baseMoveScore : 0;
+  score += sameSuitBonus;
+
+  replaceCards(indices, newCards);
 
   let msg = isTrio ? "Cricket!" : "Pair pays!";
 
@@ -569,31 +709,202 @@ function performReplace(indices, isTrio = false) {
   checkGameOver();
 }
 
-function handleSlotInteraction(slot, idx) {
-  // ... (your existing logic)
+function countPossibleMoves() {
+  const board = slots.map(s => s.dataset.rank || null);
+  let count = 0;
 
-  playSound(selectSound);
-  hapticFeedback('light');
+  const freq = {};
+  for (let rank of board) {
+    const v = getValue(rank);
+    if (v >= 1 && v <= 10) freq[v] = (freq[v] || 0) + 1;
+  }
 
-  // ... rest unchanged
+  for (let a = 1; a <= 10; a++) {
+    const b = 11 - a;
+    if (b < a || b > 10) continue;
+    count += (freq[a] || 0) * (freq[b] || 0);
+  }
+
+  const j = board.filter(r => r === 'J').length;
+  const q = board.filter(r => r === 'Q').length;
+  const k = board.filter(r => r === 'K').length;
+  count += Math.min(j, q, k);
+
+  return count;
 }
 
 function checkGameOver() {
-  // ... (your existing logic)
+  const possible = countPossibleMoves();
+  updateStats(possible);
 
   if (possible === 0) {
     const isNewRecord = saveHighScore();
 
-    // ... existing modal setup ...
+    document.getElementById('finalScore').textContent = score;
 
+    const msgEl = document.getElementById('highScoreMessage');
     if (isNewRecord) {
-      // ... existing new record UI ...
+      msgEl.innerHTML = '<span class="new-high-score">BEST POT OF THE NIGHT!</span>';
       playSound(recordSound);
+      hapticFeedback('record');
+      showMessage("New house record set! Well played.", '#ffeb3b');
+    } else {
+      msgEl.textContent = '';
+    }
+
+    document.getElementById('gameOverModal').style.display = 'flex';
+  }
+}
+
+function handleSlotInteraction(slot, idx) {
+  const rank = slot.dataset.rank;
+  if (!rank) return;
+
+  playSound(selectSound);
+  hapticFeedback('light');
+
+  if (selected.includes(idx)) {
+    selected = selected.filter(i => i !== idx);
+    slot.classList.remove('selected');
+    if (selected.length === 0) mode = null;
+    else {
+      const first = slots[selected[0]].dataset.rank;
+      mode = (getValue(first) >= 1 && getValue(first) <= 10) ? 'pair' : 'trio';
+    }
+    return;
+  }
+
+  if (selected.length === 0) {
+    const val = getValue(rank);
+    if (val >= 1 && val <= 10) {
+      mode = 'pair';
+    } else if (['J','Q','K'].includes(rank)) {
+      mode = 'trio';
+    } else {
+      showMessage("Start with a number or face card.", '#ffaa00');
+      return;
+    }
+  } else if (mode === 'pair') {
+    if (getValue(rank) < 1 || getValue(rank) > 10) {
+      showMessage("Numbers only for a pair.", '#ff5555');
+      return;
+    }
+  } else if (mode === 'trio') {
+    if (!['J','Q','K'].includes(rank)) {
+      showMessage("Only face cards for Cricket.", '#ff5555');
+      return;
+    }
+    if (selected.some(i => slots[i].dataset.rank === rank)) {
+      showMessage(`No duplicate faces allowed.`, '#ff5555');
+      return;
+    }
+  }
+
+  const max = mode === 'pair' ? 2 : 3;
+  if (selected.length >= max) return;
+
+  selected.push(idx);
+  slot.classList.add('selected');
+
+  if (selected.length === 2 && mode === 'pair') {
+    const v1 = getValue(slots[selected[0]].dataset.rank);
+    const v2 = getValue(slots[selected[1]].dataset.rank);
+    if (v1 + v2 === 11) {
+      performReplace([...selected], false);
+    }
+  } else if (selected.length === 3 && mode === 'trio') {
+    const ranksSet = new Set(selected.map(i => slots[i].dataset.rank));
+    if (ranksSet.size === 3 && ranksSet.has('J') && ranksSet.has('Q') && ranksSet.has('K')) {
+      performReplace([...selected], true);
     }
   }
 }
 
-// ... rest of your script (initGrid, resetEverything, event listeners, start call) ...
+function initGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  slots = [];
+  selected = [];
+  mode = null;
+
+  cardsPlayed = 9;
+  score = 9;
+
+  for (let i = 0; i < 9; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'card-slot';
+    slot.dataset.index = i;
+
+    const card = deck[i];
+    if (card) {
+      slot.appendChild(renderCard(card));
+      slot.dataset.rank  = card.rank;
+      slot.dataset.suit  = card.suit;
+      slot.dataset.color = card.color;
+    }
+
+    ['click', 'touchend'].forEach(event => {
+      slot.addEventListener(event, (e) => {
+        e.preventDefault();
+        handleSlotInteraction(slot, i);
+      }, { passive: false });
+    });
+
+    grid.appendChild(slot);
+    slots.push(slot);
+  }
+
+  deck.splice(0, 9);
+  updateStats();
+  checkGameOver();
+}
+
+function resetEverything(fullReset = true) {
+  createDeck();
+  document.getElementById('gameOverModal').style.display = 'none';
+  document.getElementById('message').textContent = '';
+  movesCount = 0;
+  score = 0;
+  cardsPlayed = 0;
+  deselectAll();
+
+  if (fullReset) {
+    // clearHighScore();   // uncomment to reset high score on full reset
+  }
+
+  initGrid();
+}
+
+// ─── Event Listeners ───────────────────────────────────
+const rulesToggle = document.getElementById('rulesToggle');
+const rulesPanel = document.getElementById('rulesPanel');
+
+rulesToggle.addEventListener('click', () => {
+  rulesPanel.classList.toggle('show');
+  rulesToggle.textContent = rulesPanel.classList.contains('show') ? 'Hide House Rules' : 'Show House Rules';
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => resetEverything(true));
+document.getElementById('restartBtn').addEventListener('click', () => {
+  document.getElementById('gameOverModal').style.display = 'none';
+  resetEverything(false);
+});
+
+// ─── Start the game ────────────────────────────────────
+loadHighScore();
+resetEverything(true);
+
+// Mobile zoom prevention
+document.addEventListener('touchstart', e => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, false);
 </script>
 </body>
 </html>
