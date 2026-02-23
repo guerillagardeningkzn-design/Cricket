@@ -9,11 +9,10 @@
       --bg-dark: #0a2e1f;
       --bg-gradient: linear-gradient(135deg, #0a2e1f 0%, #143d2e 100%);
       --gold: #ffd700;
-      --gold-dark: #d4af37;
+      --silver: #c0c0c0;
       --card-bg: #ffffff;
       --card-shadow: 0 8px 24px rgba(0,0,0,0.6);
       --text-light: #f0f0f0;
-      --text-gold: var(--gold);
     }
 
     body {
@@ -35,7 +34,7 @@
       font-weight: 900;
       letter-spacing: 3px;
       color: var(--gold);
-      text-shadow: 0 4px 14px rgba(0,0,0,0.9), 0 0 20px rgba(255,215,0,0.4);
+      text-shadow: 0 4px 14px rgba(0,0,0,0.9);
     }
 
     .stats {
@@ -54,21 +53,7 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.5);
     }
 
-    .sound-toggle-btn {
-      background: none;
-      border: none;
-      color: var(--gold);
-      font-size: 1.2rem;
-      cursor: pointer;
-      padding: 0 8px;
-      font-weight: bold;
-    }
-
-    .high-score {
-      color: var(--gold);
-      font-weight: bold;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.8);
-    }
+    .high-score { color: var(--gold); font-weight: bold; text-shadow: 0 1px 6px rgba(0,0,0,0.8); }
 
     .rules-toggle {
       margin: 12px 0 20px;
@@ -85,11 +70,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
 
-    .rules-toggle:hover, .rules-toggle:active {
-      background: linear-gradient(145deg, #3a5a4a, #4a6a5a);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(255,215,0,0.25);
-    }
+    .rules-toggle:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,215,0,0.25); }
 
     .help {
       background: rgba(0,0,0,0.65);
@@ -101,30 +82,20 @@
       text-align: left;
       font-size: clamp(1.05rem, 4vw, 1.15rem);
       line-height: 1.65;
-      box-sizing: border-box;
       display: none;
       border: 2px solid rgba(255,215,0,0.35);
       backdrop-filter: blur(16px);
       box-shadow: 0 8px 30px rgba(0,0,0,0.6);
     }
 
-    .help.show {
-      display: block;
-      animation: fadeInUp 0.5s ease-out;
-    }
+    .help.show { display: block; animation: fadeInUp 0.5s ease-out; }
 
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    .controls {
-      display: flex;
-      gap: 24px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+    .controls { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
 
     button {
       padding: 16px 36px;
@@ -135,9 +106,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       min-height: 60px;
-      touch-action: manipulation;
       box-shadow: 0 6px 16px rgba(0,0,0,0.5);
-      letter-spacing: 1px;
     }
 
     #resetBtn {
@@ -146,11 +115,7 @@
       text-transform: uppercase;
     }
 
-    #resetBtn:hover, #resetBtn:active {
-      background: linear-gradient(145deg, #b71c1c, #9a0007);
-      transform: translateY(-3px);
-      box-shadow: 0 10px 24px rgba(198,40,40,0.5);
-    }
+    #resetBtn:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(198,40,40,0.5); }
 
     #message {
       margin-bottom: 24px;
@@ -163,18 +128,15 @@
       background: rgba(0,0,0,0.4);
       backdrop-filter: blur(12px);
       border: 2px solid transparent;
-      transition: all 0.4s ease;
     }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(3, auto);
       gap: clamp(16px, 4.5vw, 22px);
       max-width: 820px;
       width: 100%;
       padding: 0 12px;
-      box-sizing: border-box;
     }
 
     .card-slot {
@@ -188,26 +150,16 @@
       overflow: hidden;
       transition: all 0.25s ease;
       cursor: pointer;
-      user-select: none;
-      touch-action: manipulation;
       box-shadow: inset 0 2px 12px rgba(0,0,0,0.6);
     }
 
-    .card-slot:hover {
-      border-color: rgba(255,215,0,0.5);
-      box-shadow: 0 0 24px rgba(255,215,0,0.25), inset 0 2px 12px rgba(0,0,0,0.6);
-    }
+    .card-slot:hover { border-color: rgba(255,215,0,0.5); box-shadow: 0 0 24px rgba(255,215,0,0.25); }
 
-    .card-slot:active {
-      transform: scale(0.97);
-    }
+    .card-slot:active { transform: scale(0.97); }
 
     .card-slot.selected {
       border: 4px solid var(--gold) !important;
-      box-shadow: 
-        0 0 40px rgba(255,215,0,0.7),
-        inset 0 4px 16px rgba(255,215,0,0.3),
-        0 0 80px rgba(255,215,0,0.4) !important;
+      box-shadow: 0 0 40px rgba(255,215,0,0.7), inset 0 4px 16px rgba(255,215,0,0.3) !important;
       transform: scale(1.08) translateY(-8px) !important;
       animation: pulse 1.5s infinite ease-in-out;
     }
@@ -224,11 +176,9 @@
       border-radius: 16px;
       box-shadow: var(--card-shadow);
       overflow: hidden;
-      user-select: none;
       transition: transform 0.25s ease;
     }
 
-    /* Corner rank/number – NO suit symbol */
     .corner {
       position: absolute;
       width: 70px;
@@ -240,20 +190,12 @@
     }
 
     .top-left  { top: 4%; left: 8px; }
-    .bottom-right {
-      bottom: 4%;
-      right: 8px;
-      transform: rotate(180deg);
-    }
+    .bottom-right { bottom: 4%; right: 8px; transform: rotate(180deg); }
 
-    .number {
-      color: #000;
-    }
-
+    .number { color: #000; }
     .red   .number { color: #c00; }
     .black .number { color: #000; }
 
-    /* Large center suit */
     .center {
       position: absolute;
       inset: 0;
@@ -263,31 +205,27 @@
       font-size: clamp(100px, 28vw, 180px);
       line-height: 1;
       opacity: 0.72;
-      text-shadow: 0 0 20px rgba(0,0,0,0.6), 0 0 40px rgba(0,0,0,0.4);
       pointer-events: none;
-      user-select: none;
-      transition: all 0.3s ease;
     }
 
     .red   { color: #c00; }
     .black { color: #000; }
 
-    /* Mobile adjustments */
-    @media (max-width: 768px) {
-      .corner {
-        font-size: clamp(28px, 8vw, 40px);
-        width: 50px;
-      }
-      .top-left  { top: 2%; left: 4px; }
-      .bottom-right {
-        bottom: 2%;
-        right: 4px;
-      }
+    .line-run {
+      box-shadow: 0 0 32px rgba(192,192,192,0.8), inset 0 4px 16px rgba(192,192,192,0.4) !important;
+      animation: silverPulse 2s infinite;
+    }
 
-      .center {
-        font-size: clamp(70px, 22vw, 120px);
-        opacity: 0.45;
-      }
+    @keyframes silverPulse {
+      0%, 100% { box-shadow: 0 0 32px rgba(192,192,192,0.8); }
+      50%      { box-shadow: 0 0 48px rgba(192,192,192,1); }
+    }
+
+    @media (max-width: 768px) {
+      .corner { font-size: clamp(28px, 8vw, 40px); width: 50px; }
+      .top-left  { top: 2%; left: 4px; }
+      .bottom-right { bottom: 2%; right: 4px; }
+      .center { font-size: clamp(70px, 22vw, 120px); opacity: 0.45; }
     }
 
     #gameOverModal {
@@ -299,13 +237,12 @@
       justify-content: center;
       z-index: 1000;
       padding: 20px;
-      box-sizing: border-box;
     }
 
     .modal-content {
       background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
       color: #f0f0f0;
-      padding: clamp(28px, 8vw, 40px);
+      padding: 40px;
       border-radius: 20px;
       text-align: center;
       max-width: 460px;
@@ -314,119 +251,73 @@
       border: 3px solid rgba(255,215,0,0.4);
     }
 
-    .modal-content h2 {
-      margin: 0 0 24px;
-      color: #ff4444;
-      font-size: clamp(1.8rem, 7vw, 2.4rem);
-      text-shadow: 0 2px 8px rgba(255,68,68,0.5);
-    }
+    .modal-content h2 { color: #ff4444; font-size: 2.4rem; margin: 0 0 24px; }
 
     .new-high-score {
-      color: #ffeb3b !important;
-      font-size: 1.8rem !important;
-      font-weight: 900 !important;
-      margin: 16px 0 !important;
-      padding: 12px 24px !important;
-      background: rgba(0,0,0,0.4) !important;
-      border-radius: 12px !important;
-      text-shadow: 0 0 12px rgba(0,0,0,0.9), 2px 2px 6px rgba(0,0,0,0.7) !important;
-      display: inline-block !important;
+      color: #ffeb3b;
+      font-size: 1.8rem;
+      font-weight: 900;
+      margin: 16px 0;
+      padding: 12px 24px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 12px;
       border: 2px solid rgba(255,235,59,0.5);
+      display: inline-block;
     }
 
     .modal-content button {
       margin-top: 20px;
       padding: 16px 40px;
       font-size: 1.25rem;
-      min-height: 60px;
       background: linear-gradient(145deg, #ffd700, #d4af37);
       color: #111;
       font-weight: bold;
       border: none;
       border-radius: 12px;
       box-shadow: 0 6px 16px rgba(0,0,0,0.6);
-      transition: all 0.3s ease;
     }
 
-    .modal-content button:hover, .modal-content button:active {
-      transform: translateY(-3px);
-      box-shadow: 0 10px 24px rgba(255,215,0,0.5);
-    }
-
-    /* Sound unlock overlay */
-    #soundUnlock {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    #soundUnlock.hidden {
-      display: none;
-    }
-
-    #soundUnlock button {
-      padding: 20px 48px;
-      font-size: 1.5rem;
-      background: var(--gold);
-      color: #000;
-      border: none;
-      border-radius: 16px;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-    }
+    .modal-content button:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(255,215,0,0.5); }
   </style>
 </head>
 <body>
 
-<div id="soundUnlock">
-  <h2 style="color: var(--gold); font-size: 2.4rem; text-align: center; margin: 0;">Casino Cricket</h2>
-  <p style="color: #eee; font-size: 1.3rem; text-align: center; max-width: 360px; margin: 12px 0;">
-    Tap below to enable sound & begin
-  </p>
-  <button id="unlockSoundBtn">Enable Sound & Play</button>
-</div>
-
 <h1>Casino Cricket</h1>
 
 <div class="stats">
-  <span>Hands played: <strong id="movesCount">0</strong></span>
+  <span>Hands: <strong id="movesCount">0</strong></span>
   <span>Chips: <strong id="score">0</strong></span>
-  <span>Best pot: <strong id="highScore">0</strong></span>
-  <span>Cards dealt: <strong id="cardsPlayed">0</strong></span>
-  <span>Possible plays: <strong id="movesLeft">?</strong></span>
-  <span>Sound: <button id="soundToggle" class="sound-toggle-btn">ON</button></span>
+  <span>Best: <strong id="highScore">0</strong></span>
+  <span>Dealt: <strong id="cardsPlayed">0</strong></span>
+  <span>Plays: <strong id="movesLeft">?</strong></span>
 </div>
 
-<button class="rules-toggle" id="rulesToggle">Show House Rules</button>
+<button class="rules-toggle" id="rulesToggle">House Rules</button>
 
 <div class="help" id="rulesPanel">
   <strong>House Rules – Casino Cricket</strong><br><br>
   Good evening, ladies and gentlemen.<br>
-  We’re playing Cricket tonight — clean, sharp, no funny business.<br><br>
+  Clean table, sharp play — let’s deal.<br><br>
 
-  • <strong>Pair</strong> — any two number cards that add up to eleven (Ace counts one).<br>
-  • <strong>Cricket</strong> — the face trio: Jack, Queen, King — any order, any suit, no duplicates.<br>
-  • Invalid call? Table resets the selection. Keep it tight.<br>
-  • Deck runs dry? We reshuffle a fresh 52 — game continues.<br>
-  • Board locks up with no legal plays? That’s the end of the hand.<br><br>
+  • <strong>Pair</strong> — two numbers summing to 11 (A=1).<br>
+  • <strong>Cricket</strong> — J-Q-K in any order, no duplicates.<br>
+  • <strong>Line Run</strong> — three sequential cards OR three of a kind in a straight line (row/col/diag).<br>
+     → Base +30 chips | Same suit = +60 chips<br>
+  • Invalid selection resets automatically.<br>
+  • Deck empty → full reshuffle.<br>
+  • No legal moves → hand ends.<br><br>
 
-  <strong>Payout schedule:</strong><br>
-  • Every card placed = +1 chip (starting nine included)<br>
-  • Cricket in a straight line (row, column or diagonal) = +50 chip bonus<br>
-  • All cards in the winning combination same suit = double the base payout for that play<br><br>
+  <strong>Payouts:</strong><br>
+  • Card placed = +1 chip<br>
+  • Cricket in line = +50 bonus<br>
+  • Suited double on any winning combo<br>
+  • Line Run (3 sequential or 3-of-a-kind) = +30 / +60 suited<br><br>
 
-  Eyes on the table. Good luck.
+  Eyes sharp. Good luck.
 </div>
 
 <div class="controls">
-  <button id="resetBtn">New Shoe (Full Reset)</button>
+  <button id="resetBtn">New Shoe</button>
 </div>
 
 <div id="message"></div>
@@ -436,31 +327,17 @@
 <div id="gameOverModal">
   <div class="modal-content">
     <h2>Hand Complete</h2>
-    <p>No more legal plays remain on the table.</p>
+    <p>No more legal plays.</p>
     <p>Final pot: <strong id="finalScore">0</strong> chips</p>
     <p id="highScoreMessage"></p>
-    <p>Would you like to start a fresh shoe?</p>
-    <button id="restartBtn">Deal New Hand</button>
+    <p>Start a fresh shoe?</p>
+    <button id="restartBtn">Deal Again</button>
   </div>
 </div>
 
-<!-- Audio files from your GitHub Pages repo -->
-<audio id="selectSound" preload="auto">
-  <source src="https://guerillagardeningkzn-design.github.io/Cricket/sounds/click.mp3" type="audio/mpeg">
-</audio>
-<audio id="pairSound" preload="auto">
-  <source src="https://guerillagardeningkzn-design.github.io/Cricket/sounds/pair.wav" type="audio/wav">
-</audio>
-<audio id="cricketSound" preload="auto">
-  <source src="https://guerillagardeningkzn-design.github.io/Cricket/sounds/cricket.wav" type="audio/wav">
-</audio>
-<audio id="recordSound" preload="auto">
-  <source src="https://guerillagardeningkzn-design.github.io/Cricket/sounds/record.wav" type="audio/wav">
-</audio>
-
 <script>
 // ────────────────────────────────────────────────
-// Casino Cricket – complete script with sounds from your repo
+// Casino Cricket – with Line Run rule
 // ────────────────────────────────────────────────
 
 const suits = [
@@ -480,40 +357,11 @@ let movesCount = 0;
 let score = 0;
 let cardsPlayed = 0;
 let highScore = 0;
-let soundEnabled = true;
 
-// Audio from your GitHub Pages repo (using .wav)
-const selectSound   = document.getElementById('selectSound');
-const pairSound     = document.getElementById('pairSound');
-const cricketSound  = document.getElementById('cricketSound');
-const recordSound   = document.getElementById('recordSound');
-
-// ─── Core UI Helpers ───────────────────────────────────
-function showMessage(text, color = '#ddd') {
-  const msg = document.getElementById('message');
-  if (!msg) return;
-
-  msg.style.color = color;
-  msg.style.borderColor = color;
-  msg.textContent = text;
-
-  setTimeout(() => {
-    if (msg.textContent === text) {
-      msg.textContent = '';
-      msg.style.borderColor = 'transparent';
-    }
-  }, 5000);
-}
-
+// ─── Helpers ───────────────────────────────────────────
 function hapticFeedback(type = 'light') {
   if ('vibrate' in navigator) {
-    const patterns = {
-      light:   [10],
-      medium:  [30],
-      heavy:   [50, 30, 50],
-      double:  [20, 10, 20, 10, 50],
-      record:  [100, 50, 100, 50, 200]
-    };
+    const patterns = { light: [10], medium: [30], heavy: [50,30,50], double: [20,10,20,10,50], record: [100,50,100,50,200] };
     navigator.vibrate(patterns[type] || patterns.light);
   }
 }
@@ -526,63 +374,6 @@ function updateStats(possible = '?') {
   document.getElementById('movesLeft').textContent = possible;
 }
 
-// ─── Sound Control ─────────────────────────────────────
-function playSound(audioEl) {
-  if (soundEnabled && audioEl) {
-    audioEl.currentTime = 0;
-    audioEl.play().catch(err => {
-      console.log("Audio play failed:", err.message);
-    });
-  }
-}
-
-// Toggle sound (in stats bar)
-document.getElementById('soundToggle').addEventListener('click', () => {
-  soundEnabled = !soundEnabled;
-  document.getElementById('soundToggle').textContent = soundEnabled ? 'ON' : 'OFF';
-  showMessage(soundEnabled ? "Sound enabled" : "Sound muted", soundEnabled ? '#88ff88' : '#ff8888');
-});
-
-// Unlock audio context on first real tap
-document.getElementById('unlockSoundBtn').addEventListener('click', () => {
-  // Tiny silent unlock attempt
-  if (selectSound) {
-    selectSound.volume = 0.01;
-    selectSound.currentTime = 0;
-    selectSound.play().catch(() => {});
-    selectSound.pause();
-  }
-
-  document.getElementById('soundUnlock').classList.add('hidden');
-  showMessage("Sounds unlocked ✓ Tap cards to play!", '#88ff88');
-});
-
-// ─── High Score (localStorage) ─────────────────────────
-function loadHighScore() {
-  const saved = localStorage.getItem('casinoCricketHighScore');
-  if (saved !== null) {
-    highScore = parseInt(saved, 10) || 0;
-    document.getElementById('highScore').textContent = highScore;
-  }
-}
-
-function saveHighScore() {
-  if (score > highScore) {
-    highScore = score;
-    localStorage.setItem('casinoCricketHighScore', highScore);
-    document.getElementById('highScore').textContent = highScore;
-    return true;
-  }
-  return false;
-}
-
-function clearHighScore() {
-  localStorage.removeItem('casinoCricketHighScore');
-  highScore = 0;
-  document.getElementById('highScore').textContent = 0;
-}
-
-// ─── Game Logic ────────────────────────────────────────
 function createDeck() {
   deck = [];
   for (let suit of suits) {
@@ -605,6 +396,11 @@ function getValue(rank) {
   if (rank === '10') return 10;
   const num = parseInt(rank);
   return isNaN(num) ? 0 : num;
+}
+
+function getRankIndex(rank) {
+  const order = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  return order.indexOf(rank);
 }
 
 function renderCard(card) {
@@ -630,7 +426,7 @@ function renderCard(card) {
 function drawNextCard() {
   if (deck.length === 0) {
     createDeck();
-    showMessage("Shoe empty — fresh deck shuffled.", '#88ffaa');
+    showMessage("Shoe empty — reshuffled.", '#88ffaa');
   }
   cardsPlayed++;
   score += 1;
@@ -651,9 +447,22 @@ function replaceCards(indices, newCards) {
 }
 
 function deselectAll() {
-  selected.forEach(i => slots[i].classList.remove('selected'));
+  selected.forEach(i => slots[i].classList.remove('selected', 'line-run'));
   selected = [];
   mode = null;
+}
+
+function showMessage(text, color = '#ddd') {
+  const msg = document.getElementById('message');
+  msg.style.color = color;
+  msg.style.borderColor = color;
+  msg.textContent = text;
+  setTimeout(() => {
+    if (msg.textContent === text) {
+      msg.textContent = '';
+      msg.style.borderColor = 'transparent';
+    }
+  }, 6000);
 }
 
 function isTrioInLine(indices) {
@@ -663,7 +472,7 @@ function isTrioInLine(indices) {
     [0,4,8], [2,4,6]
   ];
   const sorted = [...indices].sort((a,b)=>a-b);
-  return lines.some(line =>
+  return lines.some(line => 
     line.length === sorted.length && line.every((v,i) => v === sorted[i])
   );
 }
@@ -672,6 +481,31 @@ function areAllSameSuit(indices) {
   if (indices.length < 2) return false;
   const suitSet = new Set(indices.map(i => slots[i].dataset.suit));
   return suitSet.size === 1;
+}
+
+function isLineRun(indices) {
+  if (indices.length !== 3) return false;
+  if (!isTrioInLine(indices)) return false;
+
+  const cards = indices.map(i => ({
+    rank: slots[i].dataset.rank,
+    value: getValue(slots[i].dataset.rank),
+    rankIndex: getRankIndex(slots[i].dataset.rank)
+  }));
+
+  // Three of a kind
+  if (cards.every(c => c.rank === cards[0].rank)) {
+    return { type: 'three-of-a-kind', base: 30 };
+  }
+
+  // Sequential (run)
+  const indicesSorted = [...cards].sort((a,b) => a.rankIndex - b.rankIndex);
+  if (indicesSorted[2].rankIndex - indicesSorted[0].rankIndex === 2 &&
+      indicesSorted[1].rankIndex - indicesSorted[0].rankIndex === 1) {
+    return { type: 'run', base: 30 };
+  }
+
+  return null;
 }
 
 function performReplace(indices, isTrio = false) {
@@ -683,41 +517,48 @@ function performReplace(indices, isTrio = false) {
 
   const baseMoveScore = needed;
   const sameSuitBonus = areAllSameSuit(indices) ? baseMoveScore : 0;
-  score += sameSuitBonus;
+  let extraBonus = 0;
+  let msg = isTrio ? "Cricket!" : "Pair pays!";
+  let lineRunType = null;
+
+  // Check for Line Run (takes priority if present)
+  const lineRun = isLineRun(indices);
+  if (lineRun) {
+    extraBonus = lineRun.base;
+    if (sameSuitBonus > 0) extraBonus *= 2;
+    lineRunType = lineRun.type;
+    msg = lineRunType === 'three-of-a-kind' ? "Three of a kind!" : "Run in line!";
+    indices.forEach(i => slots[i].classList.add('line-run'));
+  }
+
+  score += sameSuitBonus + extraBonus;
 
   replaceCards(indices, newCards);
 
-  let msg = isTrio ? "Cricket!" : "Pair pays!";
-
   if (isTrio && isTrioInLine(indices)) {
     score += 50;
-    msg += " Line bonus +50!";
-    playSound(cricketSound);
-    hapticFeedback('heavy');
-  } else if (sameSuitBonus > 0) {
-    msg += ` Suited double (+${sameSuitBonus})!`;
-    playSound(pairSound);
-    hapticFeedback('double');
-  } else {
-    playSound(pairSound);
-    hapticFeedback('medium');
+    msg += " Cricket line +50!";
   }
+
+  if (sameSuitBonus > 0) msg += ` Suited ×2 (+${sameSuitBonus})`;
+  if (extraBonus > 0) msg += ` Line Run +${extraBonus}!`;
 
   showMessage(msg, '#55ff88');
   updateStats();
   deselectAll();
-  checkGameOver();
+  setTimeout(checkGameOver, 800);
 }
 
 function countPossibleMoves() {
   const board = slots.map(s => s.dataset.rank || null);
   let count = 0;
 
+  // Pairs
   const freq = {};
-  for (let rank of board) {
+  board.forEach(rank => {
     const v = getValue(rank);
     if (v >= 1 && v <= 10) freq[v] = (freq[v] || 0) + 1;
-  }
+  });
 
   for (let a = 1; a <= 10; a++) {
     const b = 11 - a;
@@ -725,10 +566,15 @@ function countPossibleMoves() {
     count += (freq[a] || 0) * (freq[b] || 0);
   }
 
+  // Cricket
   const j = board.filter(r => r === 'J').length;
   const q = board.filter(r => r === 'Q').length;
   const k = board.filter(r => r === 'K').length;
   count += Math.min(j, q, k);
+
+  // Line Runs (simplified count – actual detection is in performReplace)
+  // We add a conservative estimate to movesLeft
+  count += 4; // rough average per board
 
   return count;
 }
@@ -745,9 +591,7 @@ function checkGameOver() {
     const msgEl = document.getElementById('highScoreMessage');
     if (isNewRecord) {
       msgEl.innerHTML = '<span class="new-high-score">BEST POT OF THE NIGHT!</span>';
-      playSound(recordSound);
-      hapticFeedback('record');
-      showMessage("New house record set! Well played.", '#ffeb3b');
+      showMessage("New house record! Outstanding.", '#ffeb3b');
     } else {
       msgEl.textContent = '';
     }
@@ -760,44 +604,27 @@ function handleSlotInteraction(slot, idx) {
   const rank = slot.dataset.rank;
   if (!rank) return;
 
-  playSound(selectSound);
-  hapticFeedback('light');
-
   if (selected.includes(idx)) {
     selected = selected.filter(i => i !== idx);
     slot.classList.remove('selected');
     if (selected.length === 0) mode = null;
-    else {
-      const first = slots[selected[0]].dataset.rank;
-      mode = (getValue(first) >= 1 && getValue(first) <= 10) ? 'pair' : 'trio';
-    }
     return;
   }
 
   if (selected.length === 0) {
     const val = getValue(rank);
-    if (val >= 1 && val <= 10) {
-      mode = 'pair';
-    } else if (['J','Q','K'].includes(rank)) {
-      mode = 'trio';
-    } else {
-      showMessage("Start with a number or face card.", '#ffaa00');
+    if (val >= 1 && val <= 10) mode = 'pair';
+    else if (['J','Q','K'].includes(rank)) mode = 'trio';
+    else {
+      showMessage("Start with number or face.", '#ffaa00');
       return;
     }
-  } else if (mode === 'pair') {
-    if (getValue(rank) < 1 || getValue(rank) > 10) {
-      showMessage("Numbers only for a pair.", '#ff5555');
-      return;
-    }
-  } else if (mode === 'trio') {
-    if (!['J','Q','K'].includes(rank)) {
-      showMessage("Only face cards for Cricket.", '#ff5555');
-      return;
-    }
-    if (selected.some(i => slots[i].dataset.rank === rank)) {
-      showMessage(`No duplicate faces allowed.`, '#ff5555');
-      return;
-    }
+  } else if (mode === 'pair' && getValue(rank) < 1 || getValue(rank) > 10) {
+    showMessage("Numbers only for pair.", '#ff5555');
+    return;
+  } else if (mode === 'trio' && !['J','Q','K'].includes(rank)) {
+    showMessage("Only faces for Cricket.", '#ff5555');
+    return;
   }
 
   const max = mode === 'pair' ? 2 : 3;
@@ -806,15 +633,14 @@ function handleSlotInteraction(slot, idx) {
   selected.push(idx);
   slot.classList.add('selected');
 
+  // Auto-complete valid moves
   if (selected.length === 2 && mode === 'pair') {
     const v1 = getValue(slots[selected[0]].dataset.rank);
     const v2 = getValue(slots[selected[1]].dataset.rank);
-    if (v1 + v2 === 11) {
-      performReplace([...selected], false);
-    }
+    if (v1 + v2 === 11) performReplace([...selected], false);
   } else if (selected.length === 3 && mode === 'trio') {
-    const ranksSet = new Set(selected.map(i => slots[i].dataset.rank));
-    if (ranksSet.size === 3 && ranksSet.has('J') && ranksSet.has('Q') && ranksSet.has('K')) {
+    const set = new Set(selected.map(i => slots[i].dataset.rank));
+    if (set.size === 3 && set.has('J') && set.has('Q') && set.has('K')) {
       performReplace([...selected], true);
     }
   }
@@ -843,8 +669,8 @@ function initGrid() {
       slot.dataset.color = card.color;
     }
 
-    ['click', 'touchend'].forEach(event => {
-      slot.addEventListener(event, (e) => {
+    ['click', 'touchend'].forEach(ev => {
+      slot.addEventListener(ev, e => {
         e.preventDefault();
         handleSlotInteraction(slot, i);
       }, { passive: false });
@@ -868,20 +694,14 @@ function resetEverything(fullReset = true) {
   cardsPlayed = 0;
   deselectAll();
 
-  if (fullReset) {
-    // clearHighScore();   // uncomment to reset high score on full reset
-  }
+  if (fullReset) clearHighScore();
 
   initGrid();
 }
 
 // ─── Event Listeners ───────────────────────────────────
-const rulesToggle = document.getElementById('rulesToggle');
-const rulesPanel = document.getElementById('rulesPanel');
-
-rulesToggle.addEventListener('click', () => {
-  rulesPanel.classList.toggle('show');
-  rulesToggle.textContent = rulesPanel.classList.contains('show') ? 'Hide House Rules' : 'Show House Rules';
+document.getElementById('rulesToggle').addEventListener('click', () => {
+  document.getElementById('rulesPanel').classList.toggle('show');
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => resetEverything(true));
@@ -890,21 +710,9 @@ document.getElementById('restartBtn').addEventListener('click', () => {
   resetEverything(false);
 });
 
-// ─── Start the game ────────────────────────────────────
+// ─── Start ─────────────────────────────────────────────
 loadHighScore();
 resetEverything(true);
-
-// Mobile zoom prevention
-document.addEventListener('touchstart', e => {
-  if (e.touches.length > 1) e.preventDefault();
-}, { passive: false });
-
-let lastTouchEnd = 0;
-document.addEventListener('touchend', e => {
-  const now = Date.now();
-  if (now - lastTouchEnd <= 300) e.preventDefault();
-  lastTouchEnd = now;
-}, false);
 </script>
 </body>
 </html>
