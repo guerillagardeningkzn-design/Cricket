@@ -193,9 +193,18 @@
     }
 
     .card-slot.selected {
-      border-color: var(--gold) !important;
-      box-shadow: 0 0 32px rgba(255,215,0,0.6), inset 0 2px 12px rgba(0,0,0,0.6) !important;
-      transform: scale(1.05);
+      border: 4px solid var(--gold) !important;
+      box-shadow: 
+        0 0 40px rgba(255,215,0,0.7),
+        inset 0 4px 16px rgba(255,215,0,0.3),
+        0 0 80px rgba(255,215,0,0.4) !important;
+      transform: scale(1.08) translateY(-8px) !important;
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 40px rgba(255,215,0,0.7); }
+      50%      { box-shadow: 0 0 60px rgba(255,215,0,1); }
     }
 
     .card {
@@ -206,11 +215,7 @@
       box-shadow: var(--card-shadow);
       overflow: hidden;
       user-select: none;
-      transition: transform 0.2s ease;
-    }
-
-    .card-slot.selected .card {
-      transform: scale(1.03);
+      transition: transform 0.25s ease;
     }
 
     /* Corner rank/number – NO suit symbol */
@@ -257,21 +262,21 @@
     .red   { color: #c00; }
     .black { color: #000; }
 
-    /* Mobile adjustments: smaller & closer corner ranks + smaller/fainter center suit */
+    /* Mobile adjustments */
     @media (max-width: 768px) {
       .corner {
-        font-size: clamp(28px, 8vw, 40px);      /* smaller rank text */
+        font-size: clamp(28px, 8vw, 40px);
         width: 50px;
       }
-      .top-left  { top: 2%; left: 4px; }        /* closer to top-left corner */
+      .top-left  { top: 2%; left: 4px; }
       .bottom-right {
         bottom: 2%;
         right: 4px;
       }
 
       .center {
-        font-size: clamp(70px, 22vw, 120px);    /* smaller center suit */
-        opacity: 0.45;                          /* even fainter */
+        font-size: clamp(70px, 22vw, 120px);
+        opacity: 0.45;
       }
     }
 
@@ -391,9 +396,23 @@
   </div>
 </div>
 
+<!-- Audio elements -->
+<audio id="selectSound" preload="auto">
+  <source src="https://assets.codepen.io/605876/click-light.mp3" type="audio/mpeg">
+</audio>
+<audio id="pairSound" preload="auto">
+  <source src="https://assets.codepen.io/605876/chip-win-short.mp3" type="audio/mpeg">
+</audio>
+<audio id="cricketSound" preload="auto">
+  <source src="https://assets.codepen.io/605876/success-fanfare.mp3" type="audio/mpeg">
+</audio>
+<audio id="recordSound" preload="auto">
+  <source src="https://assets.codepen.io/605876/casino-win-jingle.mp3" type="audio/mpeg">
+</audio>
+
 <script>
 // ────────────────────────────────────────────────
-// Casino Cricket – mobile corner ranks smaller & closer to edge
+// Casino Cricket – with sounds & enhanced selected cards
 // ────────────────────────────────────────────────
 
 const suits = [
@@ -413,6 +432,12 @@ let movesCount = 0;
 let score = 0;
 let cardsPlayed = 0;
 let highScore = 0;
+
+// Audio references
+const selectSound   = document.getElementById('selectSound');
+const pairSound     = document.getElementById('pairSound');
+const cricketSound  = document.getElementById('cricketSound');
+const recordSound   = document.getElementById('recordSound');
 
 // ─── High Score ────────────────────────────────────────
 function loadHighScore() {
@@ -439,7 +464,15 @@ function clearHighScore() {
   document.getElementById('highScore').textContent = 0;
 }
 
-// ─── Helpers ───────────────────────────────────────────
+// ─── Sound Helpers ─────────────────────────────────────
+function playSound(audioEl) {
+  if (audioEl) {
+    audioEl.currentTime = 0;
+    audioEl.play().catch(() => {}); // ignore autoplay block
+  }
+}
+
+// ─── Rest of game logic ────────────────────────────────
 function hapticFeedback(type = 'light') {
   if ('vibrate' in navigator) {
     const patterns = {
@@ -489,7 +522,6 @@ function renderCard(card) {
   const el = document.createElement('div');
   el.className = 'card';
 
-  // Corner rank only – no suit symbol
   const tl = document.createElement('div');
   tl.className = `corner top-left ${card.color}`;
   tl.innerHTML = `<div class="number">${card.rank}</div>`;
@@ -498,7 +530,6 @@ function renderCard(card) {
   br.className = `corner bottom-right ${card.color}`;
   br.innerHTML = `<div class="number">${card.rank}</div>`;
 
-  // Large center suit
   const center = document.createElement('div');
   center.className = `center ${card.color}`;
   center.textContent = card.suit;
@@ -585,13 +616,14 @@ function performReplace(indices, isTrio = false) {
   if (isTrio && isTrioInLine(indices)) {
     score += 50;
     msg += " Line bonus +50!";
+    playSound(cricketSound);
     hapticFeedback('heavy');
-  }
-
-  if (sameSuitBonus > 0) {
+  } else if (sameSuitBonus > 0) {
     msg += ` Suited double (+${sameSuitBonus})!`;
+    playSound(pairSound);
     hapticFeedback('double');
   } else {
+    playSound(pairSound);
     hapticFeedback('medium');
   }
 
@@ -637,6 +669,7 @@ function checkGameOver() {
     const msgEl = document.getElementById('highScoreMessage');
     if (isNewRecord) {
       msgEl.innerHTML = '<span class="new-high-score">BEST POT OF THE NIGHT!</span>';
+      playSound(recordSound);
       hapticFeedback('record');
       showMessage("New house record set! Well played.", '#ffeb3b');
     } else {
@@ -651,6 +684,7 @@ function handleSlotInteraction(slot, idx) {
   const rank = slot.dataset.rank;
   if (!rank) return;
 
+  playSound(selectSound);
   hapticFeedback('light');
 
   if (selected.includes(idx)) {
