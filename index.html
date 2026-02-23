@@ -347,7 +347,11 @@
 <body>
 
 <h1>Casino Cricket</h1>
-
+<div style="margin: 20px 0; text-align: center;">
+  <button id="startGameBtn" style="padding: 16px 40px; font-size: 1.3rem; background: #ffd700; color: #000; border: none; border-radius: 12px; cursor: pointer; font-weight: bold;">
+    Start Game – Enable Sounds
+  </button>
+</div>
 <div class="stats">
   <span>Hands played: <strong id="movesCount">0</strong></span>
   <span>Chips: <strong id="score">0</strong></span>
@@ -829,6 +833,18 @@ document.addEventListener('touchend', e => {
   if (now - lastTouchEnd <= 300) e.preventDefault();
   lastTouchEnd = now;
 }, false);
+
+  document.getElementById('startGameBtn').addEventListener('click', () => {
+  // Preload & briefly play one sound to "unlock" audio context
+  selectSound.currentTime = 0;
+  selectSound.play().catch(() => {});
+  
+  // Hide button after first tap
+  document.getElementById('startGameBtn').style.display = 'none';
+  
+  // Optional: show a small toast
+  showMessage("Sounds enabled ✓", '#88ff88');
+});
 </script>
 </body>
 </html>
