@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Casino Cricket </title>
+  <title>Casino Cricket</title>
   <style>
     :root {
       --bg-dark: #0a2e1f;
@@ -336,9 +336,9 @@
 </div>
 
 <script>
-// ────────────────────────────────────────────────
-// Casino Cricket – with Line Run rule
-// ────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════
+// Casino Cricket – FULL WORKING VERSION
+// ════════════════════════════════════════════════════════
 
 const suits = [
   { name: '♥', color: 'red' },
@@ -358,10 +358,57 @@ let score = 0;
 let cardsPlayed = 0;
 let highScore = 0;
 
-// ─── Helpers ───────────────────────────────────────────
+// ─── High Score (localStorage) ───────────────────────────
+function loadHighScore() {
+  const saved = localStorage.getItem('casinoCricketHighScore');
+  if (saved !== null) {
+    highScore = parseInt(saved, 10) || 0;
+    document.getElementById('highScore').textContent = highScore;
+  }
+}
+
+function saveHighScore() {
+  if (score > highScore) {
+    highScore = score;
+    localStorage.setItem('casinoCricketHighScore', highScore);
+    document.getElementById('highScore').textContent = highScore;
+    return true;
+  }
+  return false;
+}
+
+function clearHighScore() {
+  localStorage.removeItem('casinoCricketHighScore');
+  highScore = 0;
+  document.getElementById('highScore').textContent = 0;
+}
+
+// ─── Core UI Helpers ───────────────────────────────────
+function showMessage(text, color = '#ddd') {
+  const msg = document.getElementById('message');
+  if (!msg) return;
+
+  msg.style.color = color;
+  msg.style.borderColor = color;
+  msg.textContent = text;
+
+  setTimeout(() => {
+    if (msg.textContent === text) {
+      msg.textContent = '';
+      msg.style.borderColor = 'transparent';
+    }
+  }, 6000);
+}
+
 function hapticFeedback(type = 'light') {
   if ('vibrate' in navigator) {
-    const patterns = { light: [10], medium: [30], heavy: [50,30,50], double: [20,10,20,10,50], record: [100,50,100,50,200] };
+    const patterns = {
+      light: [10],
+      medium: [30],
+      heavy: [50,30,50],
+      double: [20,10,20,10,50],
+      record: [100,50,100,50,200]
+    };
     navigator.vibrate(patterns[type] || patterns.light);
   }
 }
@@ -374,6 +421,7 @@ function updateStats(possible = '?') {
   document.getElementById('movesLeft').textContent = possible;
 }
 
+// ─── Game Logic ────────────────────────────────────────
 function createDeck() {
   deck = [];
   for (let suit of suits) {
@@ -452,19 +500,6 @@ function deselectAll() {
   mode = null;
 }
 
-function showMessage(text, color = '#ddd') {
-  const msg = document.getElementById('message');
-  msg.style.color = color;
-  msg.style.borderColor = color;
-  msg.textContent = text;
-  setTimeout(() => {
-    if (msg.textContent === text) {
-      msg.textContent = '';
-      msg.style.borderColor = 'transparent';
-    }
-  }, 6000);
-}
-
 function isTrioInLine(indices) {
   const lines = [
     [0,1,2], [3,4,5], [6,7,8],
@@ -484,8 +519,8 @@ function areAllSameSuit(indices) {
 }
 
 function isLineRun(indices) {
-  if (indices.length !== 3) return false;
-  if (!isTrioInLine(indices)) return false;
+  if (indices.length !== 3) return null;
+  if (!isTrioInLine(indices)) return null;
 
   const cards = indices.map(i => ({
     rank: slots[i].dataset.rank,
@@ -498,10 +533,10 @@ function isLineRun(indices) {
     return { type: 'three-of-a-kind', base: 30 };
   }
 
-  // Sequential (run)
-  const indicesSorted = [...cards].sort((a,b) => a.rankIndex - b.rankIndex);
-  if (indicesSorted[2].rankIndex - indicesSorted[0].rankIndex === 2 &&
-      indicesSorted[1].rankIndex - indicesSorted[0].rankIndex === 1) {
+  // Sequential run (consecutive ranks)
+  const sortedByIndex = [...cards].sort((a,b) => a.rankIndex - b.rankIndex);
+  if (sortedByIndex[2].rankIndex - sortedByIndex[0].rankIndex === 2 &&
+      sortedByIndex[1].rankIndex - sortedByIndex[0].rankIndex === 1) {
     return { type: 'run', base: 30 };
   }
 
@@ -521,7 +556,7 @@ function performReplace(indices, isTrio = false) {
   let msg = isTrio ? "Cricket!" : "Pair pays!";
   let lineRunType = null;
 
-  // Check for Line Run (takes priority if present)
+  // Check Line Run first (higher priority if matched)
   const lineRun = isLineRun(indices);
   if (lineRun) {
     extraBonus = lineRun.base;
@@ -572,9 +607,8 @@ function countPossibleMoves() {
   const k = board.filter(r => r === 'K').length;
   count += Math.min(j, q, k);
 
-  // Line Runs (simplified count – actual detection is in performReplace)
-  // We add a conservative estimate to movesLeft
-  count += 4; // rough average per board
+  // Conservative estimate for Line Runs (actual check is in performReplace)
+  count += 4; // average per board
 
   return count;
 }
@@ -619,7 +653,7 @@ function handleSlotInteraction(slot, idx) {
       showMessage("Start with number or face.", '#ffaa00');
       return;
     }
-  } else if (mode === 'pair' && getValue(rank) < 1 || getValue(rank) > 10) {
+  } else if (mode === 'pair' && (getValue(rank) < 1 || getValue(rank) > 10)) {
     showMessage("Numbers only for pair.", '#ff5555');
     return;
   } else if (mode === 'trio' && !['J','Q','K'].includes(rank)) {
@@ -713,6 +747,18 @@ document.getElementById('restartBtn').addEventListener('click', () => {
 // ─── Start ─────────────────────────────────────────────
 loadHighScore();
 resetEverything(true);
+
+// Mobile zoom prevention
+document.addEventListener('touchstart', e => {
+  if (e.touches.length > 1) e.preventDefault();
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, false);
 </script>
 </body>
 </html>
